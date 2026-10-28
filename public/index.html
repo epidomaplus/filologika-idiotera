@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ιδιαίτερα - Μαθητές, ραντεβού, υλικό &amp; οικονομικά</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="auth-screen" class="auth-screen">
+        <div class="auth-card">
+            <h1>📚 Ιδιαίτερα</h1>
+            <p>Σύνδεση / Εγγραφή</p>
+            <div id="auth-error" class="auth-error" style="display:none"></div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="auth-email" placeholder="email@example.com" autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label>Κωδικός</label>
+                <input type="password" id="auth-password" placeholder="Τουλάχιστον 8 χαρακτήρες" autocomplete="current-password">
+            </div>
+            <div id="register-fields" style="display:none">
+                <div class="form-group">
+                    <label>Ονοματεπώνυμο</label>
+                    <input type="text" id="auth-name" placeholder="π.χ. Μαρία Παπαδοπούλου">
+                </div>
+                <div class="form-group">
+                    <label>Κωδικός πρόσκλησης μαθητή (μόνο για μαθητές)</label>
+                    <input type="text" id="auth-invite" placeholder="Άφησέ το κενό αν είσαι καθηγητής/τρια">
+                </div>
+            </div>
+            <div style="display:flex;gap:0.75rem;margin-top:1rem">
+                <button class="btn-primary" id="login-btn" style="flex:1">Σύνδεση</button>
+                <button class="btn-secondary" id="register-btn" style="flex:1">Εγγραφή</button>
+            </div>
+            <p id="auth-hint" style="margin-top:1.5rem;font-size:0.8rem;color:var(--text-secondary)">
+                Καθηγητές: πάτα «Εγγραφή» για νέο λογαριασμό.<br>
+                Μαθητές: συνδέσου με τα στοιχεία που σου έδωσε ο/η καθηγητής/τρια ή με τον κωδικό πρόσκλησης.
+            </p>
+        </div>
+    </div>
+
+    <!-- Student portal -->
+    <div class="app" id="portal-app" style="display:none">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>📚 Ιδιαίτερα</h1>
+                <p id="portal-teacher">Portal μαθητή</p>
+            </div>
+            <nav>
+                <button class="nav-btn portal-nav active" data-ppage="p-home"><span>🏠</span> Αρχική</button>
+                <button class="nav-btn portal-nav" data-ppage="p-appointments"><span>📅</span> Τα μαθήματά μου</button>
+                <button class="nav-btn portal-nav" data-ppage="p-materials"><span>📝</span> Σημειώσεις & Ασκήσεις</button>
+                <button class="nav-btn portal-nav" data-ppage="p-account"><span>🔑</span> Λογαριασμός</button>
+            </nav>
+            <div class="sidebar-footer">
+                <p id="portal-email" style="margin-bottom:0.5rem;font-size:0.8rem"></p>
+                <button id="portal-logout" class="btn-secondary" style="width:100%;font-size:0.8rem">Αποσύνδεση</button>
+            </div>
+        </aside>
+        <main class="main">
+            <header class="header">
+                <h2 id="portal-title">Αρχική</h2>
+                <div class="header-actions">
+                    <button id="portal-theme" title="Αλλαγή θέματος">🌙</button>
+                </div>
+            </header>
+            <section id="p-home" class="page active">
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-info"><h3 id="p-completed">0</h3><p>Ολοκληρωμένα μαθήματα</p></div></div>
+                    <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-info"><h3 id="p-upcoming-count">0</h3><p>Επερχόμενα</p></div></div>
+                    <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-info"><h3 id="p-materials-count">0</h3><p>Σημειώσεις & ασκήσεις</p></div></div>
+                </div>
+                <div class="dashboard-grid">
+                    <div class="card"><h3>Επόμενα μαθήματα</h3><div id="p-upcoming" class="list"></div></div>
+                    <div class="card"><h3>Πρόσφατο υλικό</h3><div id="p-recent" class="list"></div></div>
+                </div>
+                <div class="card" style="margin-top:1.5rem">
+                    <h3>Η πρόοδός μου</h3>
+                    <div id="p-progress"></div>
+                    <canvas id="pChart" height="120"></canvas>
+                </div>
+            </section>
+            <section id="p-appointments" class="page">
+                <div class="card"><h3>Ιστορικό & προγραμματισμένα μαθήματα</h3><div id="p-appt-list" class="list"></div></div>
+            </section>
+            <section id="p-materials" class="page">
+                <div class="card"><h3>Σημειώσεις & Ασκήσεις από τον/την καθηγητή/τρια</h3><div id="p-mat-list" class="list"></div></div>
+            </section>
+            <section id="p-account" class="page">
+                <div class="card">
+                    <h3>Αλλαγή κωδικού</h3>
+                    <div class="form-group"><label>Τρέχων κωδικός</label><input type="password" id="p-pw-cur"></div>
+                    <div class="form-group"><label>Νέος κωδικός (8+ χαρακτήρες)</label><input type="password" id="p-pw-new"></div>
+                    <button class="btn-primary" id="p-pw-save">Αποθήκευση</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="app" id="main-app" style="display:none">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>📚 Ιδιαίτερα</h1>
+                <p>Ιδιαίτερα</p>
+            </div>
+            <nav>
+                <button class="nav-btn active" data-page="dashboard">
+                    <span>🏠</span> Αρχική
+                </button>
+                <button class="nav-btn" data-page="students">
+                    <span>👥</span> Μαθητές
+                </button>
+                <button class="nav-btn" data-page="appointments">
+                    <span>📅</span> Ραντεβού
+                </button>
+                <button class="nav-btn" data-page="calendar">
+                    <span>🗓️</span> Καλεντάρι
+                </button>
+                <button class="nav-btn" data-page="progress">
+                    <span>📈</span> Πρόοδος
+                </button>
+                <button class="nav-btn" data-page="materials">
+                    <span>📝</span> Υλικό μαθητών
+                </button>
+                <button class="nav-btn" data-page="finances">
+                    <span>💰</span> Οικονομικά
+                </button>
+                <button class="nav-btn" data-page="settings">
+                    <span>⚙️</span> Ρυθμίσεις
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <p id="user-email" style="margin-bottom:0.5rem;font-size:0.8rem"></p>
+                <button id="logout-btn" class="btn-secondary" style="width:100%;font-size:0.8rem">Αποσύνδεση</button>
+                <p style="margin-top:0.5rem">v3.0 • Cloud</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <header class="header">
+                <h2 id="page-title">Αρχική</h2>
+                <div class="header-actions">
+                    <button id="theme-toggle" title="Αλλαγή θέματος">🌙</button>
+                    <button id="import-btn" class="btn-secondary">Εισαγωγή</button>
+                    <button id="export-btn" class="btn-secondary">Εξαγωγή δεδομένων</button>
+                </div>
+            </header>
+
+            <!-- Dashboard -->
+            <section id="dashboard" class="page active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-info">
+                            <h3 id="today-count">0</h3>
+                            <p>Σημερινά ραντεβού</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <h3 id="students-count">0</h3>
+                            <p>Σύνολο μαθητών</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💶</div>
+                        <div class="stat-info">
+                            <h3 id="month-income">0€</h3>
+                            <p>Εισπράξεις μήνα</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏳</div>
+                        <div class="stat-info">
+                            <h3 id="pending-amount">0€</h3>
+                            <p>Εκκρεμείς πληρωμές</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>Σημερινά ραντεβού</h3>
+                        <div id="today-appointments" class="list"></div>
+                    </div>
+                    <div class="card">
+                        <h3>Επερχόμενα (επόμενες 7 ημέρες)</h3>
+                        <div id="upcoming-appointments" class="list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Students -->
+            <section id="students" class="page">
+                <div class="page-header">
+                    <div class="search-box">
+                        <input type="text" id="student-search" placeholder="Αναζήτηση μαθητή...">
+                    </div>
+                    <button class="btn-primary" id="add-student-btn">+ Νέος Μαθητής</button>
+                </div>
+                <div class="table-container">
+                    <table id="students-table">
+                        <thead>
+                            <tr>
+                                <th>Όνομα</th>
+                                <th>Τηλέφωνο</th>
+                                <th>Τάξη/Επίπεδο</th>
+                                <th>Μαθήματα</th>
+                                <th>Τιμή/ώρα</th>
+                                <th>Ενέργειες</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Appointments -->
+            <section id="appointments" class="page">
+                <div class="page-header">
+                    <div class="filters">
+                        <input type="date" id="filter-date">
+                        <select id="filter-status">
+                            <option value="">Όλες οι καταστάσεις</option>
+                            <option value="scheduled">Προγραμματισμένο</option>
+                            <option value="completed">Ολοκληρωμένο</option>
+                            <option value="cancelled">Ακυρωμένο</option>
+                        </select>
+                        <select id="filter-student">
+                            <option value="">Όλοι οι μαθητές</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" id="add-appointment-btn">+ Νέο Ραντεβού</button>
+                </div>
+                <div class="table-container">
+                    <table id="appointments-table">
+                        <thead>
+                            <tr>
+                                <th>Ημερομηνία</th>
+                                <th>Ώρα</th>
+                                <th>Μαθητής</th>
+                                <th>Μάθημα</th>
+                                <th>Διάρκεια</th>
+                                <th>Κατάσταση</th>
+                                <th>Πληρωμή</th>
+                                <th>Ενέργειες</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointments-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Calendar -->
+            <section id="calendar" class="page">
+                <div class="page-header">
+                    <div class="calendar-nav">
+                        <button class="btn-secondary" id="cal-prev">‹ Προηγ.</button>
+                        <h3 id="cal-title">Μήνας</h3>
+                        <button class="btn-secondary" id="cal-next">Επόμ. ›</button>
+                        <button class="btn-secondary" id="cal-today">Σήμερα</button>
+                    </div>
+                </div>
+                <div class="calendar-container">
+                    <div class="calendar-weekdays">
+                        <div>Δευ</div><div>Τρι</div><div>Τετ</div><div>Πεμ</div><div>Παρ</div><div>Σαβ</div><div>Κυρ</div>
+                    </div>
+                    <div id="calendar-grid" class="calendar-grid"></div>
+                </div>
+            </section>
+
+            <!-- Progress -->
+            <section id="progress" class="page">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="total-sessions">0</h3>
+                            <p>Σύνολο μαθημάτων</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="completed-sessions">0</h3>
+                            <p>Ολοκληρωμένα</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>Μαθήματα ανά μήνα</h3>
+                        <canvas id="sessionsChart" height="200"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3>Εισπράξεις ανά μήνα</h3>
+                        <canvas id="incomeChart" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="card" style="margin-top:1.5rem">
+                    <h3>Πρόοδος ανά μαθητή</h3>
+                    <div id="student-progress-list" class="list"></div>
+                </div>
+            </section>
+
+            <!-- Materials -->
+            <section id="materials" class="page">
+                <div class="page-header">
+                    <div class="filters">
+                        <select id="mat-filter">
+                            <option value="">Όλο το υλικό</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" id="add-material-btn">+ Νέα σημείωση / άσκηση</button>
+                </div>
+                <div class="card">
+                    <h3>Αναρτημένο υλικό</h3>
+                    <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.75rem">Το υλικό εμφανίζεται στο portal του μαθητή (ανά μαθητή, ανά τάξη/επίπεδο ή σε όλους). Οι μαθητές αποκτούν λογαριασμό από «Μαθητές → Προβολή → Λογαριασμός μαθητή».</p>
+                    <div id="materials-list" class="list"></div>
+                </div>
+            </section>
+
+            <!-- Finances -->
+            <section id="finances" class="page">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="total-income">0€</h3>
+                            <p>Συνολικές εισπράξεις</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3 id="total-pending">0€</h3>
+                            <p>Συνολικά εκκρεμή</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Ιστορικό πληρωμών & εκκρεμοτήτων</h3>
+                    <div id="finances-list" class="list"></div>
+                </div>
+            </section>
+
+            <!-- Settings -->
+            <section id="settings" class="page">
+                <div class="card">
+                    <h3>Ρυθμίσεις εφαρμογής</h3>
+                    <div class="form-group">
+                        <label>Όνομα καθηγητή</label>
+                        <input type="text" id="teacher-name" placeholder="π.χ. Γιάννης Παπαδόπουλος">
+                    </div>
+                    <div class="form-group">
+                        <label>Προεπιλεγμένη τιμή/ώρα (€)</label>
+                        <input type="number" id="default-rate" value="15" min="0" step="0.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Μαθήματα (χωρισμένα με κόμμα)</label>
+                        <input type="text" id="subjects-list" value="Αρχαία Ελληνικά, Νέα Ελληνικά, Λογοτεχνία, Έκθεση, Ιστορία, Λατινικά">
+                    </div>
+                    <hr>
+                    <h4>Υπενθυμίσεις Email (EmailJS)</h4>
+                    <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.75rem">
+                        Για να στέλνονται email 1 ώρα πριν, δημιούργησε δωρεάν λογαριασμό στο 
+                        <a href="https://www.emailjs.com" target="_blank">emailjs.com</a> και βάλε τα στοιχεία παρακάτω.
+                    </p>
+                    <div class="form-group">
+                        <label>Email καθηγητή</label>
+                        <input type="email" id="teacher-email" placeholder="teacher@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>EmailJS Public Key</label>
+                        <input type="text" id="emailjs-key" placeholder="user_xxxxxxx">
+                    </div>
+                    <div class="form-group">
+                        <label>EmailJS Service ID</label>
+                        <input type="text" id="emailjs-service" placeholder="service_xxxxxxx">
+                    </div>
+                    <div class="form-group">
+                        <label>EmailJS Template ID</label>
+                        <input type="text" id="emailjs-template" placeholder="template_xxxxxxx">
+                    </div>
+                    <button class="btn-primary" id="save-settings">Αποθήκευση ρυθμίσεων</button>
+                    <hr>
+                    <h4>Διαχείριση δεδομένων</h4>
+                    <button class="btn-danger" id="clear-data">Διαγραφή όλων των δεδομένων</button>
+                    <p class="warning">Προσοχή: Αυτή η ενέργεια δεν αναιρείται!</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Τίτλος</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="modal-cancel">Ακύρωση</button>
+                <button class="btn-primary" id="modal-save">Αποθήκευση</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="app.js?v=3"></script>
+</body>
+</html>
