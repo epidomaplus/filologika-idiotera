@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: filologika-idiotera
+    runtime: node
+    region: frankfurt
+    plan: free
+    buildCommand: npm ci --omit=dev
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      - key: ALLOW_SIGNUP
+        value: "true"
+      - key: APP_NAME
+        value: Φιλολογικά Ιδιαίτερα
+      - key: DATABASE_URL
+        sync: false

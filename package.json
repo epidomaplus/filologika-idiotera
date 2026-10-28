@@ -1,0 +1,18 @@
+{
+  "name": "filologika-idiotera",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Φιλολογικά Ιδιαίτερα — διαχείριση ιδιαιτέρων για φιλολόγους: μαθητές, ραντεβού, πρόοδος, οικονομικά, υλικό & portal μαθητή",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "smoke": "node scripts/smoke.js"
+  },
+  "engines": { "node": ">=20" },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.22.3",
+    "pg": "^8.23.1"
+  }
+}
