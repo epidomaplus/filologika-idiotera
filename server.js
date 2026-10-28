@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const { Pool } = require('pg');
 
 const PORT = process.env.PORT || 3000;
-const APP_NAME = process.env.APP_NAME || 'Φιλολογικά Ιδιαίτερα';
+const APP_NAME = process.env.APP_NAME || 'Ιδιαίτερα';
 const ALLOW_SIGNUP = (process.env.ALLOW_SIGNUP || 'true') !== 'false';
 const PROD = process.env.NODE_ENV === 'production';
 const SESSION_DAYS = 30;
@@ -37,7 +37,7 @@ const q = (text, params) => pool.query(text, params);
 
 const DEFAULT_DATA = () => ({
   students: [], appointments: [],
-  settings: { teacherName: '', defaultRate: 15, subjects: 'Αρχαία Ελληνικά, Νέα Ελληνικά, Λογοτεχνία, Έκθεση, Ιστορία, Λατινικά' },
+  settings: { teacherName: '', defaultRate: 15, subjects: 'Μαθηματικά, Φυσική, Χημεία, Αγγλικά, Νέα Ελληνικά, Ιστορία' },
   theme: 'light',
 });
 

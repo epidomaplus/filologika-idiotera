@@ -15,6 +15,6 @@ services:
       - key: ALLOW_SIGNUP
         value: "true"
       - key: APP_NAME
-        value: Φιλολογικά Ιδιαίτερα
+        value: Ιδιαίτερα
       - key: DATABASE_URL
         sync: false
