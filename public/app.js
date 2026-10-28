@@ -20,7 +20,7 @@ const defaultData = () => ({
     settings: {
         teacherName: '',
         defaultRate: 15,
-        subjects: 'Αρχαία Ελληνικά, Νέα Ελληνικά, Λογοτεχνία, Έκθεση, Ιστορία, Λατινικά'
+        subjects: 'Μαθηματικά, Φυσική, Χημεία, Αγγλικά, Νέα Ελληνικά, Ιστορία'
     },
     theme: 'light'
 });
